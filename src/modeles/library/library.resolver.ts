@@ -17,10 +17,9 @@ export class LibraryResolver {
     @Mutation(() => Book)
     async createBook(
         @Arg("name") name: string,
-        @Arg("authorId") authorId: string,
         @Arg("pageCount") pageCount: number,
     ) {
-        return Book.create({ name, authorId, pageCount }).save();
+        return Book.create({ name, pageCount }).save();
     }
 
     @Query(() => [Book])
