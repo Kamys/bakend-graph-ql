@@ -1,6 +1,5 @@
 import {Field, ObjectType } from "type-graphql";
-import {BaseEntity, Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn} from "typeorm";
-import { Book } from "./book.entity";
+import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 
 @ObjectType()
 @Entity()
@@ -13,8 +12,4 @@ export class Author extends BaseEntity {
     @Field()
     @Column()
     name: string;
-
-    @Field(() => [Book], { nullable: true })
-    @ManyToMany(() => Book, book => book.authors)
-    books: Book[];
 }
