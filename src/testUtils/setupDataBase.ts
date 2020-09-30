@@ -1,13 +1,13 @@
-import { createTestConnection } from "./createTestConnection";
+import { createTestConnection } from './createTestConnection';
 
 const main = async () => {
-    try {
-        await createTestConnection({
-            dropSchema: true
-        })
-    } finally {
-        process.exit()
-    }
-}
+  try {
+    await createTestConnection({
+      dropSchema: true,
+    });
+  } finally {
+    process.exit();
+  }
+};
 
-main()
+main();
