@@ -1,7 +1,22 @@
 import { UserInputError } from "apollo-server-express";
-import { Arg, Int, Mutation, Query, Resolver } from "type-graphql";
+import {Arg, Int, Mutation, Query, Resolver} from "type-graphql";
 import { Author } from "../../entity/author.entity";
 import {Book} from "../../entity/book.entity";
+
+
+const queryBookWithoutAuthor = `
+    SELECT *
+    FROM book
+             LEFT JOIN book_authors_author ON book_authors_author."bookBookId" = book."bookId"
+    WHERE "authorAuthorId" is NULL
+`
+
+const queryAuthorWithoutBook = `
+    SELECT *
+    FROM author
+             LEFT JOIN book_authors_author ON book_authors_author."bookBookId" = author."authorId"
+    WHERE "authorAuthorId" is NULL
+`
 
 @Resolver()
 export class LibraryResolver {
@@ -11,8 +26,22 @@ export class LibraryResolver {
     }
 
     @Query(() => [Author])
-    async authors() {
-        return Author.find();
+    async authors(@Arg("withoutBooks", { nullable: true }) withoutBooks?: boolean) {
+
+        if (withoutBooks) {
+            return Author.query(queryAuthorWithoutBook)
+        }
+
+        return Author.find({ relations: ["books"] });
+    }
+
+    @Query(() => [Book])
+    async books(@Arg("withoutAuthors", { nullable: true }) withoutAuthors?: boolean) {
+        if (withoutAuthors) {
+           return Book.query(queryBookWithoutAuthor)
+        }
+
+        return Book.find({ relations: ["authors"] });
     }
 
     @Mutation(() => Book)
@@ -51,10 +80,5 @@ export class LibraryResolver {
         ]
 
         return Book.save(book);
-    }
-
-    @Query(() => [Book])
-    async books() {
-        return Book.find({ relations: ["authors"] });
     }
 }

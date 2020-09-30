@@ -48,3 +48,35 @@ export const createBook = async (name: string, pageCount: number): Promise<BookR
         }
     }) as BookResponse;
 }
+
+
+type AttachAuthorResponse = {
+    data: {
+        attachAuthor: {
+            bookId: string
+        }
+    }
+}
+
+type AttachAuthorParams = {
+    bookId: string
+    authorId: string
+}
+
+export const attachAuthor = async ({ bookId, authorId }: AttachAuthorParams): Promise<AttachAuthorResponse> => {
+    const source = `
+            mutation Attach($bookId: String!, $authorId: String!) {
+              attachAuthor(bookId: $bookId, authorId: $authorId) {
+                bookId
+              }
+            }
+        `
+
+    return await requestGraphql({
+        source,
+        variableValues: {
+            bookId,
+            authorId,
+        }
+    }) as AttachAuthorResponse;
+}

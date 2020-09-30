@@ -24,7 +24,7 @@ export class Book extends BaseEntity {
     pageCount: number;
 
     @Field(() => [Author], { nullable: true })
-    @ManyToMany(() => Author)
+    @ManyToMany(() => Author, author => author.books)
     @JoinTable()
     authors: Author[];
 }

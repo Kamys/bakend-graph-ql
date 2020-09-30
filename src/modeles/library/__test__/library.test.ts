@@ -3,7 +3,7 @@ import {createTestConnection} from "../../../testUtils/createTestConnection";
 
 import {Author} from "../../../entity/author.entity";
 import {Book} from "../../../entity/book.entity";
-import { createAuthor, createBook } from "../../../testUtils/library";
+import {attachAuthor, createAuthor, createBook } from "../../../testUtils/library";
 import {requestGraphql} from "../../../testUtils/requestGraphql";
 
 let conn: Connection;
@@ -13,14 +13,6 @@ beforeAll(async () => {
 afterAll(async () => {
     await conn.close();
 });
-
-type AttachAuthorResponse = {
-    data: {
-        attachAuthor: {
-            bookId: string
-        }
-    }
-}
 
 describe("Library", () => {
     it("author is created", async () => {
@@ -67,23 +59,14 @@ describe("Library", () => {
 
         const responseAuthor = await createAuthor(authorName)
         const responseBook = await createBook(bookName, pageCount)
+
         const bookId = responseBook.data.createBook.bookId;
+        const authorId = responseAuthor.data.createAuthor.authorId;
 
-        const source = `
-            mutation Attach($bookId: String!, $authorId: String!) {
-              attachAuthor(bookId: $bookId, authorId: $authorId) {
-                bookId
-              }
-            }
-        `
-
-        const responseAttach = await requestGraphql({
-            source,
-            variableValues: {
-                bookId,
-                authorId: responseAuthor.data.createAuthor.authorId,
-            }
-        }) as AttachAuthorResponse;
+        const responseAttach = await attachAuthor({
+            bookId,
+            authorId,
+        })
 
         expect(responseAttach.data).toMatchObject({
             attachAuthor: {
@@ -99,5 +82,73 @@ describe("Library", () => {
         const bookAuthor = book?.authors[0]
         expect(bookAuthor).toBeDefined();
         expect(bookAuthor?.name).toBe(authorName);
+    });
+
+    it("get all author without books", async () => {
+        await Author.delete({})
+        const responseAuthor = await createAuthor('Author with book')
+        const responseBook = await createBook('Book', 100)
+
+
+
+        await attachAuthor({
+            authorId: responseAuthor.data.createAuthor.authorId,
+            bookId: responseBook.data.createBook.bookId,
+        })
+
+        const source = `
+        {
+          authors(withoutBooks: true) {
+            authorId
+          }
+        }
+        `
+
+        const responseAuthorWithoutBook = await createAuthor('Author without book')
+        const response = await requestGraphql({
+            source,
+        });
+
+        expect(response.data).toMatchObject({
+            authors: [
+                {
+                    authorId: responseAuthorWithoutBook.data.createAuthor.authorId,
+                }
+            ]
+        })
+    });
+
+    it("get all books without author", async () => {
+        await Book.delete({})
+        const responseAuthor = await createAuthor('Author with book')
+        const responseBook = await createBook('Book with author', 100)
+
+
+
+        await attachAuthor({
+            authorId: responseAuthor.data.createAuthor.authorId,
+            bookId: responseBook.data.createBook.bookId,
+        })
+
+        const source = `
+        {
+          books(withoutAuthors: true) {
+            bookId
+          }
+        }
+        `
+
+        const responseBookWithoutAuthor = await createBook('Book without author', 100)
+        const response = await requestGraphql({
+            source,
+        });
+
+        expect(response.data).toMatchObject({
+            books: [
+                {
+                    bookId: responseBookWithoutAuthor.data.createBook.bookId,
+                }
+            ]
+        })
     });
 });
