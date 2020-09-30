@@ -3,15 +3,19 @@ import { ApolloServer } from "apollo-server-express";
 import * as Express from "express";
 import { buildSchema } from "type-graphql";
 import {LibraryResolver} from "./modeles/library/library.resolver";
-import { createConnection } from "typeorm";
+import { getConnectionOptions} from "typeorm";
 import {Author} from "./entity/author.entity";
 import {Book} from "./entity/book.entity";
+import {safeCreateConnection} from "./utils/safeCreateConnection";
+import {PostgresConnectionOptions} from "typeorm/driver/postgres/PostgresConnectionOptions";
 
 const port = 3000;
 
 const bootstrap = async () => {
 
-    const connection = await createConnection();
+    const ormOpts = await getConnectionOptions() as PostgresConnectionOptions
+
+    const connection = await safeCreateConnection(ormOpts);
 
     const bookRepository = connection.getRepository(Book);
     const authorRepository = connection.getRepository(Author);

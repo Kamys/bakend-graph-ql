@@ -6,7 +6,6 @@
   "username": "root",
   "password": "123456",
   "database": "library",
-  "dropSchema": true,
   "logging": true,
   "synchronize": true,
   "entities": ["src/entity/*.entity.ts"]

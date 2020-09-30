@@ -1,4 +1,4 @@
-import {Field, ObjectType } from "type-graphql";
+import {Field, Int, ObjectType } from "type-graphql";
 import {Author} from "./author.entity";
 import {
     BaseEntity,
@@ -19,7 +19,7 @@ export class Book extends BaseEntity {
     @Column()
     name: string;
 
-    @Field()
+    @Field(() => Int)
     @Column()
     pageCount: number;
 

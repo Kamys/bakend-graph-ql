@@ -1,5 +1,5 @@
 import { UserInputError } from "apollo-server-express";
-import { Arg, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Int, Mutation, Query, Resolver } from "type-graphql";
 import { Author } from "../../entity/author.entity";
 import {Book} from "../../entity/book.entity";
 
@@ -18,7 +18,7 @@ export class LibraryResolver {
     @Mutation(() => Book)
     async createBook(
         @Arg("name") name: string,
-        @Arg("pageCount") pageCount: number,
+        @Arg("pageCount", () => Int) pageCount: number,
     ) {
         return Book.create({ name, pageCount }).save();
     }
